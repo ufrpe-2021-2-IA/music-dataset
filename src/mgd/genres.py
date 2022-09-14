@@ -11,6 +11,25 @@ class Genres(enum.Enum):
     ROCK = (4, 'Rock')
 
     @classmethod
+    def from_number(cls, v: int) -> Genres:
+        if v == 0:
+            return cls.CLASSIC
+
+        if v == 1:
+            return cls.HIP_HOP
+
+        if v == 2:
+            return cls.ELECTRONIC
+
+        if v == 3:
+            return cls.POP
+
+        if v == 4:
+            return cls.ROCK
+
+        raise ValueError("Valor não reconhecido")
+
+    @classmethod
     def is_genre_gtzan(cls, value: str | int) -> bool:
         if isinstance(value, str):
             return value in list(_GTZAN_STR_MAPPER.keys())
