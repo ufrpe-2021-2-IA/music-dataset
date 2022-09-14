@@ -9,7 +9,8 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 
-_DOWNLOAD_URL = 'file:///home/moesiof/Downloads/genres.tar.gz'
+# Set GTZAN download URL
+_DOWNLOAD_URL = 'NONE'
 
 
 def load_gtzan(gtzan_dir) -> tf.data.Dataset:
