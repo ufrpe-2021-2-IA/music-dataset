@@ -4,6 +4,7 @@ Módulo que define as pipelines para obtenção do MGD.
 
 import pathlib
 
+import pandas as pd
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
@@ -42,3 +43,19 @@ def gtzan_collect_genres(gtzan_dir: str, save_result=False) -> tf.data.Dataset:
             gtzan.save(str(save_path))
 
     return gtzan
+
+
+def gtzan_to_df(gtzan: tf.data.Dataset, save_directory: str = None) -> pd.DataFrame:
+    df: pd.DataFrame = pd.DataFrame(list(gtzan.as_numpy_iterator()))
+    df = df.rename(columns={0: 'audio', 1: 'label'})
+    df['src'] = 'GTZAN'
+
+    if save_directory:
+        save_path = pathlib.Path(save_directory)
+
+        if not save_path.exists():
+            save_path.mkdir(parents=True, exist_ok=True)
+            save_path.joinpath('gtzan_remapped.csv')
+            df.to_csv(str(save_path), index=False)
+
+    return df
