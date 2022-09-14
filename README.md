@@ -35,7 +35,7 @@ TODO: Adicionar descrição.
 As músicas foram coletadas da seguinte forma:
 
 - Para o GTZAN, selecionamos $100$ músicas de 4 dos 5 gêneros considerados. Ou seja, coletamos todas as músicas desse gênero.
-  - Utilizamos a versão disponibilizada pelo [TensorFlow](https://www.tensorflow.org/datasets/catalog/gtzan) nessa etapa.
+  - Utilizamos a versão disponibilizada no [Kaggle](https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification) nessa etapa.
 - Para o MSD, selecionamos músicas do gênero restante buscando linearmente nas anotações do *tagtraum* (iniciando no topo documento e descendo linha a linha até colocar as músicas faltantes para cada gênero). Depois, obtivemos arquivos de áudio com 30s através dos previews do 7Digital e Spotify.
   - As anotações do *tagtraum* mapeiam IDs das músicas no *Echo Nest* para gêneros e sub-gêneros.
   -  O [Million Song Dataset Echo Nest mapping archive](https://labs.acousticbrainz.org/million-song-dataset-echonest-archive/) mapeia IDs de músicas no *Echo Nest* para IDs de outros serviços como *Spotify* e *7Digital*.
