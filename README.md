@@ -75,5 +75,3 @@ Visto que as anotações do GTZAN e MSD + tagtraum são diferentes, realizamos u
 ## Agregação no dataset final
 
 Por último, adicionamos uma nova *linha* no dataset contendo o rótulo e as características extraídas da música atual. Em adição, também adicionamos metadados acerca do dataset de origem (GTZAN ou MSD) e seu identificador nesse dataset (nome do arquivo para o GTZAN, *Echo Nest ID* para o MSD).
-
-O dataset é criado e disponibilizado utilizando o *TensorFlow Datasets*.

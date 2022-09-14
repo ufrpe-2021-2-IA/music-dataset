@@ -8,6 +8,7 @@ import pathlib
 import pandas as pd
 import numpy as np
 import librosa
+import sklearn
 
 
 class AudioFeatures(typing.NamedTuple):
@@ -23,12 +24,12 @@ class AudioFeatures(typing.NamedTuple):
 
 class NormalizedAudioFeatures(typing.NamedTuple):
     """
-    Representa as características normalizadas de uma música.
+    Representa as características médias normalizadas de uma música.
     """
     mfcc: np.ndarray
-    sf: float
-    sc: float
-    sr: float
+    sf: np.ndarray
+    sc: np.ndarray
+    sr: np.ndarray
     tonnetz: np.ndarray
 
 
@@ -73,6 +74,10 @@ def load_audio(path: str | pathlib.Path,
 def extract_features(audio_seq: np.ndarray,
                      sample_rate=22050,
                      n_mfcc=13) -> AudioFeatures:
+    """
+    Recebe uma música (waveform de float) como entrada
+        e extrai suas características por frame.
+    """
 
     # Calcular o valor de cada característica utilizando os frames padrão
     mfcc = librosa.feature.mfcc(y=audio_seq, sr=sample_rate, n_mfcc=n_mfcc)
@@ -81,15 +86,30 @@ def extract_features(audio_seq: np.ndarray,
     sr = librosa.feature.spectral_rolloff(y=audio_seq, sr=sample_rate)
     tonnetz = librosa.feature.tonnetz(y=audio_seq, sr=sample_rate)
 
-    # Normalização e cálculo da média das características
-    # TODO: escolher melhor forma de normalização
-
     return AudioFeatures(mfcc=mfcc, sf=sf, sc=sc, sr=sr, tonnetz=tonnetz)
 
 
-def _min_max_normalizer(value: np.ndarray):
-    pass
+def normalize_features(features: AudioFeatures) -> NormalizedAudioFeatures:
+    """
+    Recebe as características de uma música por frame e retorna a média
+        normalizada dessas características.
+    """
+
+    return NormalizedAudioFeatures(mfcc=_min_max_scaler(features.mfcc),
+                                   sf=_min_max_scaler(features.sf),
+                                   sc=_min_max_scaler(features.sc),
+                                   sr=_min_max_scaler(features.sr),
+                                   tonnetz=_min_max_scaler(features.tonnetz))
 
 
-def _standard_scaler(value: np.ndarray):
-    pass
+def _standard_scaler(value: np.ndarray) -> np.ndarray:
+    scaler = sklearn.preprocessing.StandardScaler()
+    result = scaler.fit_transform(X=value).mean(axis=-1)
+    return result
+
+
+def _min_max_scaler(value: np.ndarray,
+                    range=(-1.0, 1.0)) -> np.ndarray:
+    return sklearn.preprocessing.minmax_scale(value,
+                                              feature_range=range,
+                                              axis=-1).mean(axis=-1)

@@ -1,3 +1,4 @@
 from mgd import (cli,
-                 pipes,
-                 pipelines)
+                 filters,
+                 pipelines,
+                 genre)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 
 
-class Genres(enum.Enum):
+class Genre(enum.Enum):
     CLASSIC = (0, 'Clássica')
     HIP_HOP = (1, 'Hip-Hop')
     ELECTRONIC = (2, 'Eletrônica')
