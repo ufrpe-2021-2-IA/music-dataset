@@ -6,19 +6,15 @@ import pathlib
 import typing
 
 from mgd import filters
-from mgd import genre
 
 
 class Example(typing.NamedTuple):
     features: filters.NormalizedAudioFeatures
-    label: genre.Genre
-    song_src: str
+    label: str
     song_id: str
 
 
-def extract_examples_from_dir(dir: str | pathlib.Path,
-                              genre: genre.Genre,
-                              src_dataset: str) -> typing.List[Example]:
+def extract_examples_from_dir(dir: str | pathlib.Path) -> typing.List[Example]:
     """
     Cria exemplos de treinamento/avaliação a partir de um diretório
         que contém arquivos de áudio de um dado dataset para um 
@@ -30,7 +26,7 @@ def extract_examples_from_dir(dir: str | pathlib.Path,
         path = pathlib.Path(path)
 
     examples: typing.List[Example] = []
-    src_dataset = src_dataset.upper()
+    genre = path.name
 
     for p in path.iterdir():
         if not p.is_file():
@@ -43,7 +39,6 @@ def extract_examples_from_dir(dir: str | pathlib.Path,
 
         examples.append(Example(features=normalized_features,
                                 label=genre,
-                                song_src=src_dataset,
                                 song_id=p.name))
 
     return examples
