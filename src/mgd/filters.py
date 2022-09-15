@@ -94,7 +94,8 @@ def normalize_features(features: AudioFeatures,
                                                 'scenario1',
                                                 'scenario2',
                                                 'scenario3',
-                                                'scenario4'] = 'scenario1') -> NormalizedAudioFeatures:
+                                                'scenario4',
+                                                'scenario5'] = 'scenario1') -> NormalizedAudioFeatures:
     """
     Recebe as características de uma música por frame e retorna a média
         normalizada dessas características.
@@ -105,12 +106,13 @@ def normalize_features(features: AudioFeatures,
         contém as características raw extraídas
 
     norm_agg: 'baseline', 'scenario1', 'scenario2', 'scenario3'
-        indica a estratégia de normalização e agregação a ser utilizada.
-            - baseline = média dos frames, sem agregação
+        indica a estratégia de normalização e agregação (média) a ser utilizada.
+            - baseline = média dos frames, sem normalização
             - scenario1 = standard score (mfcc, tonnetz) + min_max(sf,sc,sr) + média dos frames
             - scenario2 = min_max + média dos frames
             - scenario3 = standard score + média dos frames
             - scenario4 = l2-norm + média dos frames
+            - scenario5 = standard score (mfcc, tonnetz) + l2-norm (sf, sc, sr) + média dos frames
     """
 
     def default(x):
@@ -146,6 +148,12 @@ def normalize_features(features: AudioFeatures,
         sc = _l2_normalize
         sr = _standard_scaler
         tonnetz = _l2_normalize
+    elif norm_agg == 'scenario5':
+        mfcc = _standard_scaler
+        sf = _l2_normalize
+        sc = _l2_normalize
+        sr = _l2_normalize
+        tonnetz = _standard_scaler
 
     return NormalizedAudioFeatures(mfcc=mfcc(features.mfcc),
                                    sf=sf(features.sf),
