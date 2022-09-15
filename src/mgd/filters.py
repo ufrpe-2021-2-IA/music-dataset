@@ -89,17 +89,69 @@ def extract_features(audio_seq: np.ndarray,
     return AudioFeatures(mfcc=mfcc, sf=sf, sc=sc, sr=sr, tonnetz=tonnetz)
 
 
-def normalize_features(features: AudioFeatures) -> NormalizedAudioFeatures:
+def normalize_features(features: AudioFeatures,
+                       norm_agg: typing.Literal['baseline',
+                                                'scenario1',
+                                                'scenario2',
+                                                'scenario3',
+                                                'scenario4'] = 'scenario1') -> NormalizedAudioFeatures:
     """
     Recebe as características de uma música por frame e retorna a média
         normalizada dessas características.
+
+    Parameters
+    ----------
+    features: AudioFeatures
+        contém as características raw extraídas
+
+    norm_agg: 'baseline', 'scenario1', 'scenario2', 'scenario3'
+        indica a estratégia de normalização e agregação a ser utilizada.
+            - baseline = média dos frames, sem agregação
+            - scenario1 = standard score (mfcc, tonnetz) + min_max(sf,sc,sr) + média dos frames
+            - scenario2 = min_max + média dos frames
+            - scenario3 = standard score + média dos frames
+            - scenario4 = l2-norm + média dos frames
     """
 
-    return NormalizedAudioFeatures(mfcc=_standard_scaler(features.mfcc),
-                                   sf=features.sf.mean(axis=-1),
-                                   sc=_min_max_scaler(features.sc),
-                                   sr=_min_max_scaler(features.sr),
-                                   tonnetz=_standard_scaler(features.tonnetz))
+    def default(x):
+        return x.mean(axis=-1)
+
+    mfcc = default
+    sf = default
+    sc = default
+    sr = default
+    tonnetz = default
+
+    if norm_agg == 'scenario1':
+        mfcc = _standard_scaler
+        sf = _min_max_scaler
+        sc = _min_max_scaler
+        sr = _min_max_scaler
+        tonnetz = _standard_scaler
+    elif norm_agg == 'scenario2':
+        mfcc = _min_max_scaler
+        sf = _min_max_scaler
+        sc = _min_max_scaler
+        sr = _min_max_scaler
+        tonnetz = _min_max_scaler
+    elif norm_agg == 'scenario3':
+        mfcc = _standard_scaler
+        sf = _standard_scaler
+        sc = _standard_scaler
+        sr = _standard_scaler
+        tonnetz = _standard_scaler
+    elif norm_agg == 'scenario4':
+        mfcc = _l2_normalize
+        sf = _l2_normalize
+        sc = _l2_normalize
+        sr = _standard_scaler
+        tonnetz = _l2_normalize
+
+    return NormalizedAudioFeatures(mfcc=mfcc(features.mfcc),
+                                   sf=sf(features.sf),
+                                   sc=sc(features.sc),
+                                   sr=sr(features.sr),
+                                   tonnetz=tonnetz(features.tonnetz))
 
 
 def _standard_scaler(value: np.ndarray) -> np.ndarray:
@@ -113,3 +165,9 @@ def _min_max_scaler(value: np.ndarray,
     return sklearn.preprocessing.minmax_scale(value,
                                               feature_range=range,
                                               axis=-1).mean(axis=-1)
+
+
+def _l2_normalize(value: np.ndarray) -> np.ndarray:
+    scaler = sklearn.preprocessing.Normalizer(norm='l2')
+    result = scaler.fit_transform(X=value).mean(axis=-1)
+    return result
