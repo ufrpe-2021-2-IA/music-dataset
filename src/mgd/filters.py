@@ -95,11 +95,11 @@ def normalize_features(features: AudioFeatures) -> NormalizedAudioFeatures:
         normalizada dessas características.
     """
 
-    return NormalizedAudioFeatures(mfcc=_min_max_scaler(features.mfcc),
+    return NormalizedAudioFeatures(mfcc=_standard_scaler(features.mfcc),
                                    sf=_min_max_scaler(features.sf),
                                    sc=_min_max_scaler(features.sc),
                                    sr=_min_max_scaler(features.sr),
-                                   tonnetz=_min_max_scaler(features.tonnetz))
+                                   tonnetz=_standard_scaler(features.tonnetz))
 
 
 def _standard_scaler(value: np.ndarray) -> np.ndarray:
