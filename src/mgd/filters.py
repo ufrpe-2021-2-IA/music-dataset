@@ -96,7 +96,7 @@ def normalize_features(features: AudioFeatures) -> NormalizedAudioFeatures:
     """
 
     return NormalizedAudioFeatures(mfcc=_standard_scaler(features.mfcc),
-                                   sf=_min_max_scaler(features.sf),
+                                   sf=features.sf.mean(axis=-1),
                                    sc=_min_max_scaler(features.sc),
                                    sr=_min_max_scaler(features.sr),
                                    tonnetz=_standard_scaler(features.tonnetz))
