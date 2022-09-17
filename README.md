@@ -1,18 +1,18 @@
-# Music Features Genre Dataset (MFGD)
+# Music Features Genre Dataset (MGD)
 
-Esse repositório contém os códigos utilizados para o processamento do MFGD, um dataset utilizado para a classificação de musicas em gêneros. 
+Esse repositório contém os códigos utilizados para o processamento do MGD, um dataset utilizado para a classificação de musicas em gêneros. 
 
-Em particular, MFGD é constituído por características musicais e anotações de 10 gêneros das músicas presentes no [GTZAN](https://www.tensorflow.org/datasets/catalog/gtzan).
+Em particular, MGD é constituído por características musicais e anotações de 10 gêneros das músicas presentes no [GTZAN](https://www.tensorflow.org/datasets/catalog/gtzan).
 
-A figura a seguir define as etapas de processamento para a obtenção do MFGD. Inicialmente, $100$ músicas de cada gênero (totalizando $1000$ músicas) são obtidas nos datasets do GTZAN e MSD. Em seguida, todas as músicas são processadas para terem 30 segundos de duração e é realizada a etapa de extração das características. Por último, os rótulos com os gêneros são extraídos e combinados com as características para criação do MFGD.
+A figura a seguir define as etapas de processamento para a obtenção do MGD. Inicialmente, $100$ músicas de cada gênero (totalizando $1000$ músicas) são obtidas nos datasets do GTZAN e MSD. Em seguida, todas as músicas são processadas para terem 30 segundos de duração e é realizada a etapa de extração das características. Por último, os rótulos com os gêneros são extraídos e combinados com as características para criação do MGD.
 
 ```mermaid
 flowchart LR
 
 GTZAN[(GTZAN)] --> S3(Extração dos rótulos)
 GTZAN --> S4(Extração de Características)
-S4 --> MFGD[(MFGD)]
-S3 --> MFGD
+S4 --> MGD[(MGD)]
+S3 --> MGD
 
 ```
 
