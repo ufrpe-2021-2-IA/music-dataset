@@ -50,7 +50,7 @@ Markdown==3.4.1
 MarkupSafe==2.1.1
 matplotlib==3.5.3
 matplotlib-inline==0.1.6
--e git+https://github.com/ufrpe-2021-2-IA/music-dataset@618b5dbb8f99a8ad102acc843029f342f5851b5e#egg=mgd
+-e git+https://github.com/ufrpe-2021-2-IA/music-dataset@26bc58259aed0e33c896efaf16ec342faf2c9b2f#egg=mgd
 missingno==0.5.1
 multimethod==1.8
 nest-asyncio==1.5.5
