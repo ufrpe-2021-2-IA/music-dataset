@@ -107,16 +107,21 @@ def normalize_features(features: AudioFeatures,
 
     norm_agg: 'baseline', 'scenario1', 'scenario2', 'scenario3'
         indica a estratégia de normalização e agregação (média) a ser utilizada.
-            - baseline = média dos frames, sem normalização
-            - scenario1 = standard score (mfcc, tonnetz) + min_max(sf,sc,sr) + média dos frames
-            - scenario2 = min_max + média dos frames
-            - scenario3 = standard score + média dos frames
-            - scenario4 = l2-norm + média dos frames
-            - scenario5 = standard score (mfcc, tonnetz) + l2-norm (sf, sc, sr) + média dos frames
+            - baseline = sem normalização (mfcc, tonnetz, sf, sc, src) + média dos frames
+            - scenario1 = standard score (mfcc, tonnetz) + min_max (sf, sc, sr) + média dos frames
+            - scenario2 = standard score (mfcc, tonnetz, sf, sc, sr) + média dos frames
+            - scenario3 = min_max (mfcc, tonnetz, sf, sc, sr) + média dos frames
+            - scenario4 = min_max (mfcc, tonnetz) + standard score (sf, sc, sr) + média dos frames
+            - scenario5 = l2-norm (mfcc, tonnetz) + min_max (sf, sc, sr) + média dos frames
+            - scenario6 = l2-norm (mfcc, tonnetz) + standard score (sf, sc, sr) + média dos frames
     """
 
     def default(x):
-        return x.mean(axis=-1)
+        """
+        x tem que ter shape (n_samples, n_features)
+        """
+
+        return x.mean(axis=0)
 
     mfcc = default
     sf = default
@@ -124,58 +129,84 @@ def normalize_features(features: AudioFeatures,
     sr = default
     tonnetz = default
 
-    if norm_agg == 'scenario1':
+    if norm_agg == 'baseline':
+        mfcc = default
+        sf = default
+        sc = default
+        sr = default
+        tonnetz = default
+    elif norm_agg == 'scenario1':
         mfcc = _standard_scaler
         sf = _min_max_scaler
         sc = _min_max_scaler
         sr = _min_max_scaler
         tonnetz = _standard_scaler
     elif norm_agg == 'scenario2':
-        mfcc = _min_max_scaler
-        sf = _min_max_scaler
-        sc = _min_max_scaler
-        sr = _min_max_scaler
-        tonnetz = _min_max_scaler
-    elif norm_agg == 'scenario3':
         mfcc = _standard_scaler
         sf = _standard_scaler
         sc = _standard_scaler
         sr = _standard_scaler
         tonnetz = _standard_scaler
+    elif norm_agg == 'scenario3':
+        mfcc = _min_max_scaler
+        sf = _min_max_scaler
+        sc = _min_max_scaler
+        sr = _min_max_scaler
+        tonnetz = _min_max_scaler
     elif norm_agg == 'scenario4':
+        mfcc = _min_max_scaler
+        sf = _standard_scaler
+        sc = _standard_scaler
+        sr = _standard_scaler
+        tonnetz = _min_max_scaler
+    elif norm_agg == 'scenario5':
         mfcc = _l2_normalize
-        sf = _l2_normalize
-        sc = _l2_normalize
+        sf = _min_max_scaler
+        sc = _min_max_scaler
+        sr = _min_max_scaler
+        tonnetz = _l2_normalize
+    elif norm_agg == 'scenario6':
+        mfcc = _l2_normalize
+        sf = _standard_scaler
+        sc = _standard_scaler
         sr = _standard_scaler
         tonnetz = _l2_normalize
-    elif norm_agg == 'scenario5':
-        mfcc = _standard_scaler
-        sf = _l2_normalize
-        sc = _l2_normalize
-        sr = _l2_normalize
-        tonnetz = _standard_scaler
+    else:
+        print(f'[WARNING] Unrecognized scenario "{norm_agg}", using default.')
 
-    return NormalizedAudioFeatures(mfcc=mfcc(features.mfcc),
-                                   sf=sf(features.sf),
-                                   sc=sc(features.sc),
-                                   sr=sr(features.sr),
-                                   tonnetz=tonnetz(features.tonnetz))
+    return NormalizedAudioFeatures(mfcc=mfcc(features.mfcc.T),
+                                   sf=sf(features.sf.T),
+                                   sc=sc(features.sc.T),
+                                   sr=sr(features.sr.T),
+                                   tonnetz=tonnetz(features.tonnetz.T))
 
 
 def _standard_scaler(value: np.ndarray) -> np.ndarray:
+    """
+    value tem que ter shape (n_samples, n_features)
+    """
+
     scaler = sklearn.preprocessing.StandardScaler()
-    result = scaler.fit_transform(X=value).mean(axis=-1)
+    result = scaler.fit_transform(X=value).mean(axis=0)
     return result
 
 
 def _min_max_scaler(value: np.ndarray,
-                    range=(-1.0, 1.0)) -> np.ndarray:
-    return sklearn.preprocessing.minmax_scale(value,
-                                              feature_range=range,
-                                              axis=-1).mean(axis=-1)
+                    feature_range=(-1.0, 1.0)) -> np.ndarray:
+    """
+    value tem que ter shape (n_samples, n_features)
+    """
+
+    scaler = sklearn.preprocessing.MinMaxScaler(feature_range=feature_range)
+    result = scaler.fit_transform(X=value).mean(axis=0)
+    return result
 
 
 def _l2_normalize(value: np.ndarray) -> np.ndarray:
+    """
+    value tem que ter shape (n_samples, n_features)
+    """
+
     scaler = sklearn.preprocessing.Normalizer(norm='l2')
-    result = scaler.fit_transform(X=value).mean(axis=-1)
+    result = scaler.fit_transform(X=value).mean(axis=0)
     return result
