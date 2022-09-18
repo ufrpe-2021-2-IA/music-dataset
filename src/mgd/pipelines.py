@@ -14,7 +14,7 @@ class Example(typing.NamedTuple):
     song_id: str
 
 
-def extract_examples_from_dir(dir: str | pathlib.Path,
+def extract_examples_from_dir(dir: typing.Union[str, pathlib.Path],
                               norm_agg='scenario1') -> typing.List[Example]:
     """
     Cria exemplos de treinamento/avaliação a partir de um diretório

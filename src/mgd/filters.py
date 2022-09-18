@@ -33,7 +33,7 @@ class NormalizedAudioFeatures(typing.NamedTuple):
     tonnetz: np.ndarray
 
 
-def load_audio(path: str | pathlib.Path,
+def load_audio(path: typing.Union[str, pathlib.Path],
                sample_rate=22050,
                to_mono=True,
                dtype=np.float32) -> np.ndarray:
@@ -90,12 +90,7 @@ def extract_features(audio_seq: np.ndarray,
 
 
 def normalize_features(features: AudioFeatures,
-                       norm_agg: typing.Literal['baseline',
-                                                'scenario1',
-                                                'scenario2',
-                                                'scenario3',
-                                                'scenario4',
-                                                'scenario5'] = 'scenario1') -> NormalizedAudioFeatures:
+                       norm_agg='scenario1') -> NormalizedAudioFeatures:
     """
     Recebe as características de uma música por frame e retorna a média
         normalizada dessas características.
