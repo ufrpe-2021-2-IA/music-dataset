@@ -5,7 +5,7 @@ import typing
 import numpy as np
 import pandas as pd
 
-_BASE_URL = 'https://raw.githubusercontent.com/ufrpe-2021-2-IA/music-dataset/feat/summary-statistics/gtzan/processed'
+_BASE_URL = 'https://raw.githubusercontent.com/ufrpe-2021-2-IA/music-dataset/main/gtzan/processed'
 _SCENARIOS = ['raw', 'min_max', 'standardized']
 
 
