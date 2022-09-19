@@ -28,11 +28,11 @@ Selecionamos $21$ características comumente utilizadas na literatura para class
 
 As características extraídas foram as seguintes:
 
-- A média normalizada dos primeiros 12 **Mel-frequency cepstral coefficients** (MFCCs);
-- A média normalizada do **Spectral Flatness** (SF);
-- A média normalizada do **Spectral Centroid** (SC);
-- A média normalizada do **Spectral Roll-off** (SR)
-- A média normalizada das 6 dimensões do **Tonnetz**;
+- Medidas descritivas dos 12 **Mel-frequency cepstral coefficients** (MFCCs);
+- Medidas descritivas do **Spectral Flatness** (SF);
+- Medidas descritivas do **Spectral Centroid** (SC);
+- Medidas descritivas do **Spectral Roll-off** (SR)
+- Medidas descritivas das 6 dimensões do **Tonnetz**;
 
 O cálculo de tais características consiste em "quebrar" o arquivo de áudio original em múltiplos *frames* e calcular os valores para cada um desses frames, em seguida calculamos a média e normalizamos os resultados para obter uma característica agregada dos $30$ segundos.
 
