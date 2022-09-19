@@ -2,13 +2,24 @@
 Módulo com as definições dos pipes.
 """
 
-import typing
 import pathlib
+import typing
 
-import pandas as pd
-import numpy as np
 import librosa
+import numpy as np
+import pandas as pd
 import sklearn
+from scipy import stats
+
+
+class SummaryStatistics(typing.NamedTuple):
+    mean: np.ndarray
+    std: np.ndarray
+    skew: np.ndarray
+    kurtosis: np.ndarray
+    median: np.ndarray
+    min: np.ndarray
+    max: np.ndarray
 
 
 class AudioFeatures(typing.NamedTuple):
@@ -22,15 +33,16 @@ class AudioFeatures(typing.NamedTuple):
     tonnetz: np.ndarray
 
 
-class NormalizedAudioFeatures(typing.NamedTuple):
+class SummarizedAudioFeatures(typing.NamedTuple):
     """
-    Representa as características médias normalizadas de uma música.
+    Representa as características sonoras de uma música em termos de 
+        meidadas estatística.
     """
-    mfcc: np.ndarray
-    sf: np.ndarray
-    sc: np.ndarray
-    sr: np.ndarray
-    tonnetz: np.ndarray
+    mfcc: SummaryStatistics
+    sf: SummaryStatistics
+    sc: SummaryStatistics
+    sr: SummaryStatistics
+    tonnetz: SummaryStatistics
 
 
 def load_audio(path: typing.Union[str, pathlib.Path],
@@ -89,8 +101,7 @@ def extract_features(audio_seq: np.ndarray,
     return AudioFeatures(mfcc=mfcc, sf=sf, sc=sc, sr=sr, tonnetz=tonnetz)
 
 
-def normalize_features(features: AudioFeatures,
-                       norm_agg='scenario1') -> NormalizedAudioFeatures:
+def summarize_features(features: AudioFeatures) -> SummarizedAudioFeatures:
     """
     Recebe as características de uma música por frame e retorna a média
         normalizada dessas características.
@@ -99,109 +110,19 @@ def normalize_features(features: AudioFeatures,
     ----------
     features: AudioFeatures
         contém as características raw extraídas
-
-    norm_agg: 'baseline', 'scenario1', 'scenario2', 'scenario3'
-        indica a estratégia de normalização e agregação (média) a ser utilizada.
-            - baseline = sem normalização (mfcc, tonnetz, sf, sc, src) + média dos frames
-            - scenario1 = standard score (mfcc, tonnetz) + min_max (sf, sc, sr) + média dos frames
-            - scenario2 = standard score (mfcc, tonnetz, sf, sc, sr) + média dos frames
-            - scenario3 = min_max (mfcc, tonnetz, sf, sc, sr) + média dos frames
-            - scenario4 = min_max (mfcc, tonnetz) + standard score (sf, sc, sr) + média dos frames
-            - scenario5 = l2-norm (mfcc, tonnetz) + min_max (sf, sc, sr) + média dos frames
-            - scenario6 = l2-norm (mfcc, tonnetz) + standard score (sf, sc, sr) + média dos frames
     """
 
-    def default(x):
-        """
-        x tem que ter shape (n_samples, n_features)
-        """
+    def _stats(feature: np.ndarray, axis=1) -> SummaryStatistics:
+        return SummaryStatistics(mean=feature.mean(axis=axis),
+                                 std=feature.std(axis=axis),
+                                 skew=stats.skew(feature, axis=axis),
+                                 kurtosis=stats.kurtosis(feature, axis=axis),
+                                 median=np.median(feature, axis=axis),
+                                 min=feature.min(axis=axis),
+                                 max=feature.max(axis=axis))
 
-        return x.mean(axis=0)
-
-    mfcc = default
-    sf = default
-    sc = default
-    sr = default
-    tonnetz = default
-
-    if norm_agg == 'baseline':
-        mfcc = default
-        sf = default
-        sc = default
-        sr = default
-        tonnetz = default
-    elif norm_agg == 'scenario1':
-        mfcc = _standard_scaler
-        sf = _min_max_scaler
-        sc = _min_max_scaler
-        sr = _min_max_scaler
-        tonnetz = _standard_scaler
-    elif norm_agg == 'scenario2':
-        mfcc = _standard_scaler
-        sf = _standard_scaler
-        sc = _standard_scaler
-        sr = _standard_scaler
-        tonnetz = _standard_scaler
-    elif norm_agg == 'scenario3':
-        mfcc = _min_max_scaler
-        sf = _min_max_scaler
-        sc = _min_max_scaler
-        sr = _min_max_scaler
-        tonnetz = _min_max_scaler
-    elif norm_agg == 'scenario4':
-        mfcc = _min_max_scaler
-        sf = _standard_scaler
-        sc = _standard_scaler
-        sr = _standard_scaler
-        tonnetz = _min_max_scaler
-    elif norm_agg == 'scenario5':
-        mfcc = _l2_normalize
-        sf = _min_max_scaler
-        sc = _min_max_scaler
-        sr = _min_max_scaler
-        tonnetz = _l2_normalize
-    elif norm_agg == 'scenario6':
-        mfcc = _l2_normalize
-        sf = _standard_scaler
-        sc = _standard_scaler
-        sr = _standard_scaler
-        tonnetz = _l2_normalize
-    else:
-        print(f'[WARNING] Unrecognized scenario "{norm_agg}", using default.')
-
-    return NormalizedAudioFeatures(mfcc=mfcc(features.mfcc.T),
-                                   sf=sf(features.sf.T),
-                                   sc=sc(features.sc.T),
-                                   sr=sr(features.sr.T),
-                                   tonnetz=tonnetz(features.tonnetz.T))
-
-
-def _standard_scaler(value: np.ndarray) -> np.ndarray:
-    """
-    value tem que ter shape (n_samples, n_features)
-    """
-
-    scaler = sklearn.preprocessing.StandardScaler()
-    result = scaler.fit_transform(X=value).mean(axis=0)
-    return result
-
-
-def _min_max_scaler(value: np.ndarray,
-                    feature_range=(-1.0, 1.0)) -> np.ndarray:
-    """
-    value tem que ter shape (n_samples, n_features)
-    """
-
-    scaler = sklearn.preprocessing.MinMaxScaler(feature_range=feature_range)
-    result = scaler.fit_transform(X=value).mean(axis=0)
-    return result
-
-
-def _l2_normalize(value: np.ndarray) -> np.ndarray:
-    """
-    value tem que ter shape (n_samples, n_features)
-    """
-
-    scaler = sklearn.preprocessing.Normalizer(norm='l2')
-    result = scaler.fit_transform(X=value).mean(axis=0)
-    return result
+    return SummarizedAudioFeatures(mfcc=_stats(features.mfcc),
+                                   sf=_stats(features.sf),
+                                   sc=_stats(features.sc),
+                                   sr=_stats(features.sr),
+                                   tonnetz=_stats(features.tonnetz))
