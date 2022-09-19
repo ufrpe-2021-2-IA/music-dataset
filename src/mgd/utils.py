@@ -65,7 +65,16 @@ def download_experiments(scenario: str,
                 f.write(r.text)
 
 
-def prepare_sklearn(csv_path: str) -> typing.Tuple[np.ndarray, np.ndarray]:
+def prepare_sklearn(csv_path: str,
+                    features=None) -> typing.Tuple[np.ndarray, np.ndarray]:
     df = pd.read_csv(csv_path)
 
-    return df.iloc[:, 2:].to_numpy(), df['label'].to_numpy()
+    if not features:
+        return df.iloc[:, 2:].to_numpy(), df['label'].to_numpy()
+    else:
+        def _convert_to_columns_indices():
+            column_list = df.columns.to_list()
+            return list(sorted(map(lambda e: column_list.index(e), features)))
+
+        features_list = _convert_to_columns_indices()
+        return df.iloc[:, features_list].to_numpy(), df['label'].to_numpy()
