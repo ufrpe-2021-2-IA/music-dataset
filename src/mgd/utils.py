@@ -5,8 +5,8 @@ import typing
 import numpy as np
 import pandas as pd
 
-_BASE_URL = 'https://raw.githubusercontent.com/ufrpe-2021-2-IA/music-dataset/main/gtzan/processed'
-_SCENARIOS = ['baseline', 'scenario1', 'scenario3', 'scenario5']
+_BASE_URL = 'https://raw.githubusercontent.com/ufrpe-2021-2-IA/music-dataset/feat/summary-statistics/gtzan/processed'
+_SCENARIOS = ['raw']
 
 
 def download_dataset(scenario: str,
@@ -68,4 +68,4 @@ def download_experiments(scenario: str,
 def prepare_sklearn(csv_path: str) -> typing.Tuple[np.ndarray, np.ndarray]:
     df = pd.read_csv(csv_path)
 
-    return df.iloc[:, list(range(2, 23))].to_numpy(), df['label'].to_numpy()
+    return df.iloc[:, 2:].to_numpy(), df['label'].to_numpy()
