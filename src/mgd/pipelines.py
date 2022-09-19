@@ -9,13 +9,12 @@ from mgd import filters
 
 
 class Example(typing.NamedTuple):
-    features: filters.NormalizedAudioFeatures
+    features: filters.SummarizedAudioFeatures
     label: str
     song_id: str
 
 
-def extract_examples_from_dir(dir: str | pathlib.Path,
-                              norm_agg='scenario1') -> typing.List[Example]:
+def extract_examples_from_dir(dir: typing.Union[str, pathlib.Path]) -> typing.List[Example]:
     """
     Cria exemplos de treinamento/avaliação a partir de um diretório
         que contém arquivos de áudio de um dado dataset para um 
@@ -36,10 +35,9 @@ def extract_examples_from_dir(dir: str | pathlib.Path,
 
         audio_seq = filters.load_audio(p)
         features = filters.extract_features(audio_seq)
-        normalized_features = filters.normalize_features(features,
-                                                         norm_agg=norm_agg)
+        summarized_features = filters.summarize_features(features)
 
-        examples.append(Example(features=normalized_features,
+        examples.append(Example(features=summarized_features,
                                 label=genre,
                                 song_id=p.name))
 
