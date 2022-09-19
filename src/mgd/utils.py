@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 _BASE_URL = 'https://raw.githubusercontent.com/ufrpe-2021-2-IA/music-dataset/feat/summary-statistics/gtzan/processed'
-_SCENARIOS = ['raw']
+_SCENARIOS = ['raw', 'min_max', 'standardized']
 
 
 def download_dataset(scenario: str,
